@@ -32,15 +32,15 @@ class Blog(object):
 					# post = Post(path, root_dir=self.root_dir)
 					# self._cache[post.urlpath] = post
 					path = os.path.join(root, filepath)
-					print path
+					#print path
 					post = Post(path)
-					print post
+					#print post
 					self._cache[post.urlpath] = post
-					print self._cache
+					#print self._cache
 
 	def get_post_or_404(self,path):
-		print "path:",path
-		print "cache:", self._cache
+		# print "path:",path
+		# print "cache:", self._cache
 		try:
 			return self._cache[path]
 		except KeyError:
@@ -67,7 +67,7 @@ class Post(object):
 
 	def _initialize_metadata(self):
 		content = ''
-		print self.filepath
+		#print self.filepath
 		with open(self.filepath, 'r') as fin:
 			for line in fin:
 				#print line
@@ -100,7 +100,7 @@ def index():
 
 @app.route("/blog/<path:path>")
 def post(path):
-	print path
+	# print path
 	# path = os.path.join('posts', path + POSTS_FILE_EXTENSIION)
 	# post = Post(path)
 	# ----------------------------------------------------------
