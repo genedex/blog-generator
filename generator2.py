@@ -3,11 +3,11 @@ from werkzeug import cached_property
 import markdown
 import os
 import yaml
-import time
+
 POSTS_FILE_EXTENSIION = '.md'
 #app = Flask(__name__)
-
 app = Flask(__name__)
+
 class Blog(object):
 	def __init__(self, app, root_dir='',file_ext=POSTS_FILE_EXTENSIION):
 		self.root_dir = root_dir
@@ -19,7 +19,7 @@ class Blog(object):
 
 	@property
 	def posts(self):
-		return self._cache.values()
+		return self._cache.value()
 
 	def _initialize_cache(self):
 		for (root, dirpaths, filepaths) in os.walk(self.root_dir):
@@ -32,9 +32,9 @@ class Blog(object):
 					# post = Post(path, root_dir=self.root_dir)
 					# self._cache[post.urlpath] = post
 					path = os.path.join(root, filepath)
-					print path
+					#print path
 					post = Post(path)
-					print post
+					#print path
 					self._cache[post.urlpath] = post
 					print self._cache
 
@@ -42,7 +42,7 @@ class Blog(object):
 		print "path:",path
 		print "cache:", self._cache
 		try:
-			return self._cache[path]
+			return self._cache['hello.md']
 		except KeyError:
 			abort(404)
 
@@ -67,7 +67,6 @@ class Post(object):
 
 	def _initialize_metadata(self):
 		content = ''
-		print self.filepath
 		with open(self.filepath, 'r') as fin:
 			for line in fin:
 				#print line
@@ -95,12 +94,11 @@ def format_date(val, format="%B %d, %Y"):
 
 @app.route("/")
 def index():
-	#posts = [Post('hello.md', root_dir="posts")]
-	return render_template('index.html', posts=blog.posts)
+	posts = [Post('hello.md', root_dir="posts")]
+	return render_template('index.html', posts=posts)
 
-@app.route("/blog/<path:path>")
+@app.route("/blog/post/<path:path>")
 def post(path):
-	print path
 	# path = os.path.join('posts', path + POSTS_FILE_EXTENSIION)
 	# post = Post(path)
 	# ----------------------------------------------------------
