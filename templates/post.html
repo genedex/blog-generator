@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block header %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/post.css') }}">
 	<title>{{ post_content.title }}{% if post_content.subtitle %}: {{ post_content.subtitle }}{% endif %}</title>
 {% endblock header %}
 {% block content %}
