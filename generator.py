@@ -1,15 +1,18 @@
 from flask import Flask, render_template, url_for, abort, request
 from werkzeug import cached_property
+from werkzeug.contrib.atom import AtomFeed
 import markdown
 import os
 import yaml
 import time
 import collections
-from werkzeug.contrib.atom import AtomFeed
+from flask.ext.frozen import Freezer
+import sys
+import datetime
 POSTS_FILE_EXTENSIION = '.md'
 #app = Flask(__name__)
 
-app = Flask(__name__)
+
 
 class SortedDict(collections.MutableMapping):
 	def __init__(self, items=None,key=None,reverse=False):
@@ -101,6 +104,7 @@ class Post(object):
 			content = fin.read().split('\n\n',1)[1].strip()
 		return markdown.markdown(content)
 
+	#@property
 	def url(self, _external=False):
 		return url_for('post',path=self.urlpath,_external=_external)
 
@@ -116,8 +120,9 @@ class Post(object):
 		#print content
 		self.__dict__.update(yaml.load(content))
 
-
+app = Flask(__name__)
 blog = Blog(app, root_dir='posts')
+freezer = Freezer(app)
 
 # option 3
 @app.template_filter('date')
@@ -137,7 +142,7 @@ def index():
 	#posts = [Post('hello.md', root_dir="posts")]
 	return render_template('index.html', posts=blog.posts)
 
-@app.route("/blog/<path:path>")
+@app.route("/blog/<path:path>/")
 def post(path):
 	# print path
 	# path = os.path.join('posts', path + POSTS_FILE_EXTENSIION)
@@ -149,6 +154,7 @@ def post(path):
 
 @app.route('/feed.atom')
 def feed():
+
     feed = AtomFeed('Recent Articles',
                     feed_url=request.url,
                     url=request.url_root)
@@ -160,11 +166,14 @@ def feed():
             content_type='html',
             author='Gene',
             url=post.url(_external=True),
-            updated=post.date,
-            published=post.date)
+            updated= datetime.datetime.combine(post.date, datetime.datetime.min.time()),
+            published= datetime.datetime.combine(post.date, datetime.datetime.min.time()))
     return feed.get_response()
 
 
 if __name__ == '__main__':
-	post_files = [post.filepath for post in blog.posts]
-	app.run(port=8080,debug=True, extra_files = post_files)
+	if len(sys.argv) > 1 and sys.argv[1] == 'build':
+		freezer.freeze()
+	else:
+		post_files = [post.filepath for post in blog.posts]
+		app.run(port=8080,debug=True, extra_files = post_files)
