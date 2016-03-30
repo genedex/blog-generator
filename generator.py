@@ -9,8 +9,8 @@ import collections
 from flask.ext.frozen import Freezer
 import sys
 import datetime
+from flask.ext.debugtoolbar import DebugToolbarExtension
 POSTS_FILE_EXTENSIION = '.md'
-#app = Flask(__name__)
 
 
 
@@ -70,20 +70,11 @@ class Blog(object):
 			for filepath in filepaths:
 				filename, ext = os.path.splitext(filepath)
 				if ext == self.file_ext:
-					# path = os.path.join(root, filepath).replace(self.root_dir, '')
-					# print path
-					# post = Post(path, root_dir=self.root_dir)
-					# self._cache[post.urlpath] = post
 					path = os.path.join(root, filepath)
-					#print path
 					post = Post(path)
-					#print post
 					self._cache[post.urlpath] = post
-					#print self._cache
 
 	def get_post_or_404(self,path):
-		# print "path:",path
-		# print "cache:", self._cache
 		try:
 			return self._cache[path]
 		except KeyError:
@@ -110,19 +101,19 @@ class Post(object):
 
 	def _initialize_metadata(self):
 		content = ''
-		#print self.filepath
 		with open(self.filepath, 'r') as fin:
 			for line in fin:
-				#print line
 				if not line.strip():
 					break
 				content += line
-		#print content
 		self.__dict__.update(yaml.load(content))
 
 app = Flask(__name__)
 blog = Blog(app, root_dir='posts')
 freezer = Freezer(app)
+app.debug = False
+app.config['SECRET_KEY'] = 'supasecret'
+toolbar = DebugToolbarExtension(app)
 
 # option 3
 @app.template_filter('date')
@@ -170,6 +161,9 @@ def feed():
             published= datetime.datetime.combine(post.date, datetime.datetime.min.time()))
     return feed.get_response()
 
+@app.errorhandler(404)
+def not_found(error):
+    return render_template('404.html')
 
 if __name__ == '__main__':
 	if len(sys.argv) > 1 and sys.argv[1] == 'build':

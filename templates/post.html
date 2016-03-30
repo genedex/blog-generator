@@ -2,10 +2,12 @@
 
 {% block header %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/post.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/grd.css') }}">
 	<title>{{ post_content.title }}{% if post_content.subtitle %}: {{ post_content.subtitle }}{% endif %}</title>
 {% endblock header %}
 {% block content %}
  	<div id="header">
+ 		<a href="{{ url_for('index') }}" class='btn-secondary'>Home</a>
  		<h1>{{ post_content.title }}</h1>
  		{% if post_content.subtitle %}
  			<h2>{{ post_content.subtitle }}</h2>
