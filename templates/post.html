@@ -12,9 +12,13 @@
  		{% endif %}
  		{# <h3 id="date">{{ format_date(post_content.date) }}</h3> #}
  		<h3 id="date">{{ post_content.date|date }}</h3>
+ 		<br>
+
  	</div>
 
  	<div id="content">
  		{{ post_content.html|safe }}
+
  	</div>
 {% endblock content %}
+

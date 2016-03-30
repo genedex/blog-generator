@@ -1,10 +1,11 @@
-from flask import Flask, render_template, url_for, abort
+from flask import Flask, render_template, url_for, abort, request
 from werkzeug import cached_property
 import markdown
 import os
 import yaml
 import time
 import collections
+from werkzeug.contrib.atom import AtomFeed
 POSTS_FILE_EXTENSIION = '.md'
 #app = Flask(__name__)
 
@@ -100,9 +101,8 @@ class Post(object):
 			content = fin.read().split('\n\n',1)[1].strip()
 		return markdown.markdown(content)
 
-	@property
-	def url(self):
-		return url_for('post',path=self.urlpath)
+	def url(self, _external=False):
+		return url_for('post',path=self.urlpath,_external=_external)
 
 	def _initialize_metadata(self):
 		content = ''
@@ -147,6 +147,24 @@ def post(path):
 	post = blog.get_post_or_404(path)
 	return render_template("post.html", post_content=post)
 
+@app.route('/feed.atom')
+def feed():
+    feed = AtomFeed('Recent Articles',
+                    feed_url=request.url,
+                    url=request.url_root)
+    posts = blog.posts[:10]
+    title = lambda p: '%s: %s' % (p.title, p.subtitle) if hasattr(p, 'subtitle') else p.title
+    for post in posts:
+        feed.add(title(post),
+            unicode(post.html),
+            content_type='html',
+            author='Gene',
+            url=post.url(_external=True),
+            updated=post.date,
+            published=post.date)
+    return feed.get_response()
+
 
 if __name__ == '__main__':
-	app.run(port=8080,debug=True)
+	post_files = [post.filepath for post in blog.posts]
+	app.run(port=8080,debug=True, extra_files = post_files)

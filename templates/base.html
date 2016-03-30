@@ -3,8 +3,10 @@
 <head>
 	{% block header %}
 		<title>Lorem Blog</title>
-		
 	{% endblock header %}
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+
+	<link href="{{ url_for('feed') }}" rel="alternate" title="Recent Changes" type="application/atom+xml">
 </head>
 <body>
 	{% block content %}
